@@ -15,6 +15,7 @@
           const [monthlyRevenue, setMonthlyRevenue] = React.useState('');
           const [monthlyVisitors, setMonthlyVisitors] = React.useState('');
           const [profitMargin, setProfitMargin] = React.useState('');
+          const [timeframe, setTimeframe] = React.useState('3');
           const [showResults, setShowResults] = React.useState(false);
 
           const serviceCost = 3000;
@@ -26,14 +27,16 @@
             const revenue = parseFloat(monthlyRevenue) || 0;
             const visitors = parseFloat(monthlyVisitors) || 0;
             const margin = parseFloat(profitMargin) || 0;
+            const months = parseFloat(timeframe) || 3;
 
-            const newSubscribers = Math.round(visitors * captureRate);
-            const flowRevenue = revenue * flowRevenueRate;
-            const campaignRevenue = revenue * campaignRevenueRate;
+            const newSubscribers = Math.round(visitors * captureRate * months);
+            const flowRevenue = revenue * flowRevenueRate * months;
+            const campaignRevenue = revenue * campaignRevenueRate * months;
             const totalNewRevenue = flowRevenue + campaignRevenue;
             const grossProfit = totalNewRevenue * (margin / 100);
-            const netProfit = grossProfit - serviceCost;
-            const roiMultiple = (totalNewRevenue - serviceCost) / serviceCost;
+            const totalServiceCost = serviceCost * months;
+            const netProfit = grossProfit - totalServiceCost;
+            const roiMultiple = (totalNewRevenue - totalServiceCost) / totalServiceCost;
             const roiPercentage = roiMultiple * 100;
 
             return {
@@ -44,7 +47,9 @@
               grossProfit,
               netProfit,
               roiMultiple,
-              roiPercentage
+              roiPercentage,
+              totalServiceCost,
+              months
             };
           };
 
@@ -58,6 +63,7 @@
             setMonthlyRevenue('');
             setMonthlyVisitors('');
             setProfitMargin('');
+            setTimeframe('3');
             setShowResults(false);
           };
 
@@ -85,7 +91,7 @@
                     E-commerce Email & SMS Revenue Launch System
                   </h1>
                   <p style={{ fontSize: '20px', color: '#555', marginBottom: '5px' }}>ROI Calculator</p>
-                  <p style={{ fontSize: '16px', color: '#777' }}>See your potential return in 90 days</p>
+                  <p style={{ fontSize: '16px', color: '#777' }}>See your potential return over your chosen timeframe</p>
                 </div>
 
                 {/* Main Card */}
@@ -126,7 +132,7 @@
                       />
                     </div>
 
-                    <div style={{ marginBottom: '25px' }}>
+                    <div style={{ marginBottom: '20px' }}>
                       <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
                         Profit Margin (%)
                       </label>
@@ -139,6 +145,28 @@
                         onFocus={(e) => e.target.style.borderColor = '#2a8fd4'}
                         onBlur={(e) => e.target.style.borderColor = '#38B6FF'}
                       />
+                    </div>
+
+                    <div style={{ marginBottom: '25px' }}>
+                      <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
+                        Timeframe (Months)
+                      </label>
+                      <select
+                        value={timeframe}
+                        onChange={(e) => setTimeframe(e.target.value)}
+                        style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #38B6FF', borderRadius: '10px', outline: 'none', transition: 'all 0.3s', cursor: 'pointer', background: 'white' }}
+                        onFocus={(e) => e.target.style.borderColor = '#2a8fd4'}
+                        onBlur={(e) => e.target.style.borderColor = '#38B6FF'}
+                      >
+                        <option value="1">1 Month</option>
+                        <option value="2">2 Months</option>
+                        <option value="3">3 Months (90 Days)</option>
+                        <option value="4">4 Months</option>
+                        <option value="5">5 Months</option>
+                        <option value="6">6 Months</option>
+                        <option value="9">9 Months</option>
+                        <option value="12">12 Months (1 Year)</option>
+                      </select>
                     </div>
 
                     <div style={{ display: 'flex', gap: '15px' }}>
@@ -167,7 +195,7 @@
                   {showResults && results && (
                     <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '2px solid #e5e7eb' }}>
                       <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#38B6FF', marginBottom: '25px', borderBottom: '3px solid #38B6FF', paddingBottom: '10px' }}>
-                        Your Projected Results (90 Days)
+                        Your Projected Results ({results.months} Month{results.months > 1 ? 's' : ''})
                       </h2>
 
                       {/* ROI Highlight */}
@@ -224,7 +252,7 @@
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px solid #e5e7eb' }}>
                           <span style={{ fontSize: '16px', fontWeight: '600', color: '#333' }}>Service Investment</span>
-                          <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#ef4444' }}>-{formatCurrency(serviceCost)}</span>
+                          <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#ef4444' }}>-{formatCurrency(results.totalServiceCost)}</span>
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px' }}>
