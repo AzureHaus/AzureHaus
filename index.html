@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce ROI Calculator</title>
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        function App() {
+          const [monthlyRevenue, setMonthlyRevenue] = React.useState('');
+          const [monthlyVisitors, setMonthlyVisitors] = React.useState('');
+          const [profitMargin, setProfitMargin] = React.useState('');
+          const [showResults, setShowResults] = React.useState(false);
+
+          const serviceCost = 3000;
+          const captureRate = 0.03;
+          const flowRevenueRate = 0.15;
+          const campaignRevenueRate = 0.10;
+
+          const calculateROI = () => {
+            const revenue = parseFloat(monthlyRevenue) || 0;
+            const visitors = parseFloat(monthlyVisitors) || 0;
+            const margin = parseFloat(profitMargin) || 0;
+
+            const newSubscribers = Math.round(visitors * captureRate);
+            const flowRevenue = revenue * flowRevenueRate;
+            const campaignRevenue = revenue * campaignRevenueRate;
+            const totalNewRevenue = flowRevenue + campaignRevenue;
+            const grossProfit = totalNewRevenue * (margin / 100);
+            const netProfit = grossProfit - serviceCost;
+            const roiMultiple = (totalNewRevenue - serviceCost) / serviceCost;
+            const roiPercentage = roiMultiple * 100;
+
+            return {
+              newSubscribers,
+              flowRevenue,
+              campaignRevenue,
+              totalNewRevenue,
+              grossProfit,
+              netProfit,
+              roiMultiple,
+              roiPercentage
+            };
+          };
+
+          const handleCalculate = () => {
+            if (monthlyRevenue && monthlyVisitors && profitMargin) {
+              setShowResults(true);
+            }
+          };
+
+          const handleReset = () => {
+            setMonthlyRevenue('');
+            setMonthlyVisitors('');
+            setProfitMargin('');
+            setShowResults(false);
+          };
+
+          const formatCurrency = (value) => {
+            return new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0
+            }).format(value);
+          };
+
+          const formatNumber = (value) => {
+            return new Intl.NumberFormat('en-US').format(value);
+          };
+
+          const results = showResults ? calculateROI() : null;
+
+          return (
+            <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', padding: '40px 20px' }}>
+              <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+                {/* Header */}
+                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                  <h1 style={{ fontSize: '36px', fontWeight: 'bold', color: '#38B6FF', marginBottom: '10px' }}>
+                    E-commerce Email & SMS Revenue Launch System
+                  </h1>
+                  <p style={{ fontSize: '20px', color: '#555', marginBottom: '5px' }}>ROI Calculator</p>
+                  <p style={{ fontSize: '16px', color: '#777' }}>See your potential return in 90 days</p>
+                </div>
+
+                {/* Main Card */}
+                <div style={{ background: 'white', borderRadius: '20px', boxShadow: '0 10px 40px rgba(56, 182, 255, 0.15)', padding: '40px', marginBottom: '30px' }}>
+                  {/* Input Section */}
+                  <div style={{ marginBottom: '30px' }}>
+                    <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#38B6FF', marginBottom: '25px', borderBottom: '3px solid #38B6FF', paddingBottom: '10px' }}>
+                      Your Store Metrics
+                    </h2>
+                    
+                    <div style={{ marginBottom: '20px' }}>
+                      <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
+                        Monthly Store Revenue ($)
+                      </label>
+                      <input
+                        type="number"
+                        value={monthlyRevenue}
+                        onChange={(e) => setMonthlyRevenue(e.target.value)}
+                        placeholder="e.g., 100000"
+                        style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #38B6FF', borderRadius: '10px', outline: 'none', transition: 'all 0.3s' }}
+                        onFocus={(e) => e.target.style.borderColor = '#2a8fd4'}
+                        onBlur={(e) => e.target.style.borderColor = '#38B6FF'}
+                      />
+                    </div>
+
+                    <div style={{ marginBottom: '20px' }}>
+                      <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
+                        Monthly Website Visitors
+                      </label>
+                      <input
+                        type="number"
+                        value={monthlyVisitors}
+                        onChange={(e) => setMonthlyVisitors(e.target.value)}
+                        placeholder="e.g., 50000"
+                        style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #38B6FF', borderRadius: '10px', outline: 'none', transition: 'all 0.3s' }}
+                        onFocus={(e) => e.target.style.borderColor = '#2a8fd4'}
+                        onBlur={(e) => e.target.style.borderColor = '#38B6FF'}
+                      />
+                    </div>
+
+                    <div style={{ marginBottom: '25px' }}>
+                      <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
+                        Profit Margin (%)
+                      </label>
+                      <input
+                        type="number"
+                        value={profitMargin}
+                        onChange={(e) => setProfitMargin(e.target.value)}
+                        placeholder="e.g., 30"
+                        style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #38B6FF', borderRadius: '10px', outline: 'none', transition: 'all 0.3s' }}
+                        onFocus={(e) => e.target.style.borderColor = '#2a8fd4'}
+                        onBlur={(e) => e.target.style.borderColor = '#38B6FF'}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                      <button
+                        onClick={handleCalculate}
+                        style={{ flex: 1, padding: '16px', fontSize: '18px', fontWeight: 'bold', color: 'white', background: '#38B6FF', border: 'none', borderRadius: '10px', cursor: 'pointer', transition: 'all 0.3s', boxShadow: '0 4px 15px rgba(56, 182, 255, 0.3)' }}
+                        onMouseOver={(e) => e.target.style.background = '#2a8fd4'}
+                        onMouseOut={(e) => e.target.style.background = '#38B6FF'}
+                      >
+                        Calculate ROI
+                      </button>
+                      {showResults && (
+                        <button
+                          onClick={handleReset}
+                          style={{ padding: '16px 30px', fontSize: '18px', fontWeight: 'bold', color: '#38B6FF', background: 'white', border: '2px solid #38B6FF', borderRadius: '10px', cursor: 'pointer', transition: 'all 0.3s' }}
+                          onMouseOver={(e) => { e.target.style.background = '#f0f9ff'; }}
+                          onMouseOut={(e) => { e.target.style.background = 'white'; }}
+                        >
+                          Reset
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Results Section */}
+                  {showResults && results && (
+                    <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '2px solid #e5e7eb' }}>
+                      <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#38B6FF', marginBottom: '25px', borderBottom: '3px solid #38B6FF', paddingBottom: '10px' }}>
+                        Your Projected Results (90 Days)
+                      </h2>
+
+                      {/* ROI Highlight */}
+                      <div style={{ background: 'linear-gradient(135deg, #38B6FF 0%, #2a8fd4 100%)', borderRadius: '15px', padding: '30px', marginBottom: '25px', textAlign: 'center', boxShadow: '0 8px 25px rgba(56, 182, 255, 0.3)' }}>
+                        <div style={{ fontSize: '18px', color: 'white', marginBottom: '10px', fontWeight: '600' }}>
+                          Your Return on Investment
+                        </div>
+                        <div style={{ fontSize: '48px', fontWeight: 'bold', color: 'white', marginBottom: '5px' }}>
+                          {results.roiMultiple.toFixed(2)}× ROI
+                        </div>
+                        <div style={{ fontSize: '28px', color: 'white', fontWeight: '600' }}>
+                          {results.roiPercentage.toFixed(0)}% Return
+                        </div>
+                      </div>
+
+                      {/* Metrics Grid */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '25px' }}>
+                        <div style={{ background: '#f0f9ff', borderLeft: '4px solid #38B6FF', padding: '20px', borderRadius: '10px' }}>
+                          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px', fontWeight: '600' }}>New Subscribers Captured</div>
+                          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#38B6FF' }}>
+                            {formatNumber(results.newSubscribers)}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>3% capture rate</div>
+                        </div>
+
+                        <div style={{ background: '#f0f9ff', borderLeft: '4px solid #38B6FF', padding: '20px', borderRadius: '10px' }}>
+                          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px', fontWeight: '600' }}>Revenue from Flows</div>
+                          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#38B6FF' }}>
+                            {formatCurrency(results.flowRevenue)}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>15% of store revenue</div>
+                        </div>
+
+                        <div style={{ background: '#f0f9ff', borderLeft: '4px solid #38B6FF', padding: '20px', borderRadius: '10px' }}>
+                          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px', fontWeight: '600' }}>Revenue from Campaigns</div>
+                          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#38B6FF' }}>
+                            {formatCurrency(results.campaignRevenue)}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>10% of store revenue</div>
+                        </div>
+                      </div>
+
+                      {/* Financial Summary */}
+                      <div style={{ background: '#f9fafb', borderRadius: '10px', padding: '25px', border: '2px solid #e5e7eb' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px solid #e5e7eb' }}>
+                          <span style={{ fontSize: '16px', fontWeight: '600', color: '#333' }}>Total New Revenue Generated</span>
+                          <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#38B6FF' }}>{formatCurrency(results.totalNewRevenue)}</span>
+                        </div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px solid #e5e7eb' }}>
+                          <span style={{ fontSize: '16px', fontWeight: '600', color: '#333' }}>Gross Profit Added</span>
+                          <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#10b981' }}>{formatCurrency(results.grossProfit)}</span>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px solid #e5e7eb' }}>
+                          <span style={{ fontSize: '16px', fontWeight: '600', color: '#333' }}>Service Investment</span>
+                          <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#ef4444' }}>-{formatCurrency(serviceCost)}</span>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px' }}>
+                          <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>Net Profit Added</span>
+                          <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#10b981' }}>{formatCurrency(results.netProfit)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* What's Included Section */}
+                <div style={{ background: 'white', borderRadius: '20px', boxShadow: '0 10px 40px rgba(56, 182, 255, 0.15)', padding: '40px' }}>
+                  <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#38B6FF', marginBottom: '20px', textAlign: 'center' }}>
+                    What's Included - $3,000/month
+                  </h2>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '15px' }}>
+                    {[
+                      'Full Klaviyo Setup & Integration',
+                      'Welcome Series Flow',
+                      'Abandoned Cart Flow',
+                      'Abandoned Checkout Flow',
+                      'Browse Abandonment Flow',
+                      'Post-Purchase Flow',
+                      'Winback Flow',
+                      'Sunset Flow',
+                      'SMS System Setup',
+                      'List-Growth Pop-ups',
+                      'Weekly Email Campaigns',
+                      'Weekly SMS Campaigns',
+                      'Advanced Segmentation',
+                      'A/B Testing',
+                      'Behavioral Automations',
+                      'Full Revenue Reporting'
+                    ].map((item, index) => (
+                      <div key={index} style={{ display: 'flex', alignItems: 'center', padding: '12px', background: '#f0f9ff', borderRadius: '8px' }}>
+                        <span style={{ color: '#38B6FF', fontSize: '20px', marginRight: '12px' }}>✓</span>
+                        <span style={{ fontSize: '15px', color: '#333', fontWeight: '500' }}>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
