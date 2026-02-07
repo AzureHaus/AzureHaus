@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-commerce ROI Calculator</title>
+    <title>Cold Email Lead Gen ROI Calculator</title>
     <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -12,299 +12,410 @@
     <div id="root"></div>
     <script type="text/babel">
         function App() {
-          const [monthlyRevenue, setMonthlyRevenue] = React.useState('');
-          const [monthlyVisitors, setMonthlyVisitors] = React.useState('');
-          const [profitMargin, setProfitMargin] = React.useState('');
-          const [timeframe, setTimeframe] = React.useState('3');
-          const [showResults, setShowResults] = React.useState(false);
+  const [step, setStep] = React.useState(0);
+  const [avgDealValue, setAvgDealValue] = React.useState('');
+  const [closeRate, setCloseRate] = React.useState('');
+  const [callsPerMonth, setCallsPerMonth] = React.useState('');
+  const [targetClients, setTargetClients] = React.useState('');
+  const [grossMargin, setGrossMargin] = React.useState('');
+  const [showResults, setShowResults] = React.useState(false);
 
-          const serviceCost = 3667;
-          const captureRate = 0.03;
-          const flowRevenueRate = 0.15;
-          const campaignRevenueRate = 0.10;
+  const questions = [
+    {
+      title: "What is your average deal value?",
+      subtitle: "Enter the typical dollar amount of a new client contract",
+      placeholder: "e.g., 5000",
+      value: avgDealValue,
+      setter: setAvgDealValue,
+      prefix: "$"
+    },
+    {
+      title: "What is your close rate on qualified sales calls?",
+      subtitle: "Enter the percentage of qualified calls that become clients",
+      placeholder: "e.g., 20",
+      value: closeRate,
+      setter: setCloseRate,
+      suffix: "%"
+    },
+    {
+      title: "How many sales calls can you handle per month?",
+      subtitle: "Enter the realistic number of calls your team can take",
+      placeholder: "e.g., 40",
+      value: callsPerMonth,
+      setter: setCallsPerMonth,
+      suffix: " calls"
+    },
+    {
+      title: "What is your target number of new clients per month?",
+      subtitle: "Enter your monthly client acquisition goal",
+      placeholder: "e.g., 5",
+      value: targetClients,
+      setter: setTargetClients,
+      suffix: " clients"
+    },
+    {
+      title: "What is your gross margin percentage?",
+      subtitle: "Enter the profit margin on your services after direct costs",
+      placeholder: "e.g., 70",
+      value: grossMargin,
+      setter: setGrossMargin,
+      suffix: "%"
+    }
+  ];
 
-          const calculateROI = () => {
-            const revenue = parseFloat(monthlyRevenue) || 0;
-            const visitors = parseFloat(monthlyVisitors) || 0;
-            const margin = parseFloat(profitMargin) || 0;
-            const months = parseFloat(timeframe) || 3;
+  const handleNext = () => {
+    const currentValue = questions[step].value;
+    if (currentValue && parseFloat(currentValue) > 0) {
+      if (step < questions.length - 1) {
+        setStep(step + 1);
+      } else {
+        setShowResults(true);
+      }
+    }
+  };
 
-            const newSubscribers = Math.round(visitors * captureRate * months);
-            const flowRevenue = revenue * flowRevenueRate * months;
-            const campaignRevenue = revenue * campaignRevenueRate * months;
-            const totalNewRevenue = flowRevenue + campaignRevenue;
-            const grossProfit = totalNewRevenue * (margin / 100);
-            const totalServiceCost = serviceCost * months;
-            const netProfit = grossProfit - totalServiceCost;
-            const roiMultiple = (totalNewRevenue - totalServiceCost) / totalServiceCost;
-            const roiPercentage = roiMultiple * 100;
+  const handleBack = () => {
+    if (step > 0) {
+      setStep(step - 1);
+      setShowResults(false);
+    }
+  };
 
-            return {
-              newSubscribers,
-              flowRevenue,
-              campaignRevenue,
-              totalNewRevenue,
-              grossProfit,
-              netProfit,
-              roiMultiple,
-              roiPercentage,
-              totalServiceCost,
-              months
-            };
-          };
+  const handleReset = () => {
+    setStep(0);
+    setAvgDealValue('');
+    setCloseRate('');
+    setCallsPerMonth('');
+    setTargetClients('');
+    setGrossMargin('');
+    setShowResults(false);
+  };
 
-          const handleCalculate = () => {
-            if (monthlyRevenue && monthlyVisitors && profitMargin) {
-              setShowResults(true);
-            }
-          };
+  const calculateROI = () => {
+    const deal = parseFloat(avgDealValue) || 0;
+    const close = parseFloat(closeRate) / 100 || 0;
+    const calls = parseFloat(callsPerMonth) || 0;
+    const clients = parseFloat(targetClients) || 0;
+    const margin = parseFloat(grossMargin) / 100 || 0;
 
-          const handleReset = () => {
-            setMonthlyRevenue('');
-            setMonthlyVisitors('');
-            setProfitMargin('');
-            setTimeframe('3');
-            setShowResults(false);
-          };
+    // Calculate required calls to hit target
+    const callsRequired = close > 0 ? Math.ceil(clients / close) : 0;
 
-          const formatCurrency = (value) => {
-            return new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'USD',
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0
-            }).format(value);
-          };
+    // Calculate actual clients signed (limited by call capacity)
+    const actualClients = Math.min(clients, Math.floor(calls * close));
 
-          const formatNumber = (value) => {
-            return new Intl.NumberFormat('en-US').format(value);
-          };
+    // Calculate revenue and profit
+    const monthlyRevenue = actualClients * deal;
+    const grossProfit = monthlyRevenue * margin;
 
-          const results = showResults ? calculateROI() : null;
+    // Calculate outbound costs
+    const techFee = 1000;
+    const performanceFee = actualClients * 400;
+    const totalOutboundCost = techFee + performanceFee;
 
-          return (
-            <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', padding: '40px 20px' }}>
-              <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-                {/* Header */}
-                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                  <h1 style={{ fontSize: '36px', fontWeight: 'bold', color: '#38B6FF', marginBottom: '10px' }}>
-                    E-commerce Email & SMS Revenue Launch System
-                  </h1>
-                  <p style={{ fontSize: '20px', color: '#555', marginBottom: '5px' }}>ROI Calculator</p>
-                  <p style={{ fontSize: '16px', color: '#777' }}>See your potential return over 90 days</p>
-                </div>
+    // Calculate net profit and ROI
+    const netProfit = grossProfit - totalOutboundCost;
+    const roi = totalOutboundCost > 0 ? netProfit / totalOutboundCost : 0;
 
-                {/* Main Card */}
-                <div style={{ background: 'white', borderRadius: '20px', boxShadow: '0 10px 40px rgba(56, 182, 255, 0.15)', padding: '40px', marginBottom: '30px' }}>
-                  {/* Input Section */}
-                  <div style={{ marginBottom: '30px' }}>
-                    <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#38B6FF', marginBottom: '25px', borderBottom: '3px solid #38B6FF', paddingBottom: '10px' }}>
-                      Your Store Metrics
-                    </h2>
-                    
-                    <div style={{ marginBottom: '20px' }}>
-                      <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
-                        Monthly Store Revenue ($)
-                      </label>
-                      <input
-                        type="number"
-                        value={monthlyRevenue}
-                        onChange={(e) => setMonthlyRevenue(e.target.value)}
-                        placeholder="e.g., 100000"
-                        style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #38B6FF', borderRadius: '10px', outline: 'none', transition: 'all 0.3s' }}
-                        onFocus={(e) => e.target.style.borderColor = '#2a8fd4'}
-                        onBlur={(e) => e.target.style.borderColor = '#38B6FF'}
-                      />
-                    </div>
+    return {
+      callsRequired,
+      actualClients,
+      monthlyRevenue,
+      grossProfit,
+      totalOutboundCost,
+      netProfit,
+      roi,
+      deal,
+      close: close * 100
+    };
+  };
 
-                    <div style={{ marginBottom: '20px' }}>
-                      <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
-                        Monthly Website Visitors
-                      </label>
-                      <input
-                        type="number"
-                        value={monthlyVisitors}
-                        onChange={(e) => setMonthlyVisitors(e.target.value)}
-                        placeholder="e.g., 50000"
-                        style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #38B6FF', borderRadius: '10px', outline: 'none', transition: 'all 0.3s' }}
-                        onFocus={(e) => e.target.style.borderColor = '#2a8fd4'}
-                        onBlur={(e) => e.target.style.borderColor = '#38B6FF'}
-                      />
-                    </div>
+  const results = calculateROI();
+  const currentQuestion = questions[step];
 
-                    <div style={{ marginBottom: '20px' }}>
-                      <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
-                        Gross Profit Margin (%)
-                      </label>
-                      <input
-                        type="number"
-                        value={profitMargin}
-                        onChange={(e) => setProfitMargin(e.target.value)}
-                        placeholder="e.g., 30"
-                        style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #38B6FF', borderRadius: '10px', outline: 'none', transition: 'all 0.3s' }}
-                        onFocus={(e) => e.target.style.borderColor = '#2a8fd4'}
-                        onBlur={(e) => e.target.style.borderColor = '#38B6FF'}
-                      />
-                    </div>
+  const deliverables = [
+    "ICP & Market Engineering",
+    "Data & Targeting Infrastructure",
+    "Lead List Building, Validation & Optimization",
+    "Domain, Inbox & Sending Architecture",
+    "Deliverability, Warming & Reputation Control",
+    "Messaging, Copy & Sequencing System",
+    "Campaign Deployment, Volume Control & Scaling",
+    "Reply Management, Qualification & Conversation Steering",
+    "Appointment Booking, Pipeline Control & Context Handoff",
+    "Performance Tracking, Close Rate Auditing & Guarantee Compliance",
+    "Ongoing Optimization & System Expansion"
+  ];
 
-                    <div style={{ marginBottom: '25px' }}>
-                      <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
-                        Timeframe (Months)
-                      </label>
-                      <select
-                        value={timeframe}
-                        onChange={(e) => setTimeframe(e.target.value)}
-                        style={{ width: '100%', padding: '14px', fontSize: '16px', border: '2px solid #38B6FF', borderRadius: '10px', outline: 'none', transition: 'all 0.3s', cursor: 'pointer', background: 'white' }}
-                        onFocus={(e) => e.target.style.borderColor = '#2a8fd4'}
-                        onBlur={(e) => e.target.style.borderColor = '#38B6FF'}
-                      >
-                        <option value="1">1 Month</option>
-                        <option value="2">2 Months</option>
-                        <option value="3">3 Months (90 Days)</option>
-                        <option value="4">4 Months</option>
-                        <option value="5">5 Months</option>
-                        <option value="6">6 Months</option>
-                        <option value="9">9 Months</option>
-                        <option value="12">12 Months (1 Year)</option>
-                      </select>
-                    </div>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold mb-3" style={{color: '#38B6FF'}}>
+            Outbound ROI Calculator
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Calculate the predictable ROI of a cold email outbound system
+          </p>
+        </div>
 
-                    <div style={{ display: 'flex', gap: '15px' }}>
-                      <button
-                        onClick={handleCalculate}
-                        style={{ flex: 1, padding: '16px', fontSize: '18px', fontWeight: 'bold', color: 'white', background: '#38B6FF', border: 'none', borderRadius: '10px', cursor: 'pointer', transition: 'all 0.3s', boxShadow: '0 4px 15px rgba(56, 182, 255, 0.3)' }}
-                        onMouseOver={(e) => e.target.style.background = '#2a8fd4'}
-                        onMouseOut={(e) => e.target.style.background = '#38B6FF'}
-                      >
-                        Calculate ROI
-                      </button>
-                      {showResults && (
-                        <button
-                          onClick={handleReset}
-                          style={{ padding: '16px 30px', fontSize: '18px', fontWeight: 'bold', color: '#38B6FF', background: 'white', border: '2px solid #38B6FF', borderRadius: '10px', cursor: 'pointer', transition: 'all 0.3s' }}
-                          onMouseOver={(e) => { e.target.style.background = '#f0f9ff'; }}
-                          onMouseOut={(e) => { e.target.style.background = 'white'; }}
-                        >
-                          Reset
-                        </button>
-                      )}
-                    </div>
+        {!showResults ? (
+          /* Question Card */
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
+            {/* Progress Bar */}
+            <div className="mb-8">
+              <div className="flex justify-between mb-2">
+                <span className="text-sm font-medium text-gray-600">
+                  Question {step + 1} of {questions.length}
+                </span>
+                <span className="text-sm font-medium" style={{color: '#38B6FF'}}>
+                  {Math.round(((step + 1) / questions.length) * 100)}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${((step + 1) / questions.length) * 100}%`,
+                    backgroundColor: '#38B6FF'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Question */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">
+                {currentQuestion.title}
+              </h2>
+              <p className="text-gray-600">
+                {currentQuestion.subtitle}
+              </p>
+            </div>
+
+            {/* Input */}
+            <div className="mb-8">
+              <div className="relative">
+                {currentQuestion.prefix && (
+                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl font-semibold">
+                    {currentQuestion.prefix}
+                  </span>
+                )}
+                <input
+                  type="number"
+                  value={currentQuestion.value}
+                  onChange={(e) => currentQuestion.setter(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleNext()}
+                  placeholder={currentQuestion.placeholder}
+                  className="w-full px-4 py-4 text-xl border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-400 transition-colors"
+                  style={{
+                    paddingLeft: currentQuestion.prefix ? '2.5rem' : '1rem',
+                    paddingRight: currentQuestion.suffix ? '5rem' : '1rem'
+                  }}
+                  autoFocus
+                />
+                {currentQuestion.suffix && (
+                  <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg">
+                    {currentQuestion.suffix}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Navigation Buttons */}
+            <div className="flex gap-4">
+              {step > 0 && (
+                <button
+                  onClick={handleBack}
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                >
+                  ← Back
+                </button>
+              )}
+              <button
+                onClick={handleNext}
+                disabled={!currentQuestion.value || parseFloat(currentQuestion.value) <= 0}
+                className="flex-1 py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: currentQuestion.value && parseFloat(currentQuestion.value) > 0 ? '#38B6FF' : '#ccc'
+                }}
+              >
+                {step === questions.length - 1 ? 'Calculate ROI →' : 'Next →'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Results Section */
+          <div>
+            {/* Warning if close rate is below 15% */}
+            {results.close < 15 && (
+              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded">
+                <p className="text-yellow-800">
+                  <strong>Note:</strong> Your close rate is below 15%. Results depend on maintaining at least a 15% close rate on qualified calls for optimal performance.
+                </p>
+              </div>
+            )}
+
+            {/* Results Card */}
+            <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
+              <h2 className="text-3xl font-bold mb-6 text-center" style={{color: '#38B6FF'}}>
+                Your Outbound ROI Projection
+              </h2>
+
+              {/* Key Metrics Grid */}
+              <div className="grid md:grid-cols-2 gap-6 mb-8">
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <div className="text-sm text-gray-600 mb-1">Sales Calls Required</div>
+                  <div className="text-3xl font-bold text-gray-800">
+                    {results.callsRequired} calls
                   </div>
-
-                  {/* Results Section */}
-                  {showResults && results && (
-                    <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '2px solid #e5e7eb' }}>
-                      <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#38B6FF', marginBottom: '25px', borderBottom: '3px solid #38B6FF', paddingBottom: '10px' }}>
-                        Your Projected Results ({results.months} Month{results.months > 1 ? 's' : ''})
-                      </h2>
-
-                      {/* ROI Highlight */}
-                      <div style={{ background: 'linear-gradient(135deg, #38B6FF 0%, #2a8fd4 100%)', borderRadius: '15px', padding: '30px', marginBottom: '25px', textAlign: 'center', boxShadow: '0 8px 25px rgba(56, 182, 255, 0.3)' }}>
-                        <div style={{ fontSize: '18px', color: 'white', marginBottom: '10px', fontWeight: '600' }}>
-                          Your Return on Investment
-                        </div>
-                        <div style={{ fontSize: '48px', fontWeight: 'bold', color: 'white', marginBottom: '5px' }}>
-                          {results.roiMultiple.toFixed(2)}× ROI
-                        </div>
-                        <div style={{ fontSize: '28px', color: 'white', fontWeight: '600' }}>
-                          {results.roiPercentage.toFixed(0)}% Return
-                        </div>
-                      </div>
-
-                      {/* Metrics Grid */}
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '25px' }}>
-                        <div style={{ background: '#f0f9ff', borderLeft: '4px solid #38B6FF', padding: '20px', borderRadius: '10px' }}>
-                          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px', fontWeight: '600' }}>New Subscribers Captured</div>
-                          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#38B6FF' }}>
-                            {formatNumber(results.newSubscribers)}
-                          </div>
-                          <div style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>3% capture rate</div>
-                        </div>
-
-                        <div style={{ background: '#f0f9ff', borderLeft: '4px solid #38B6FF', padding: '20px', borderRadius: '10px' }}>
-                          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px', fontWeight: '600' }}>Revenue from Flows</div>
-                          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#38B6FF' }}>
-                            {formatCurrency(results.flowRevenue)}
-                          </div>
-                          <div style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>15% of store revenue</div>
-                        </div>
-
-                        <div style={{ background: '#f0f9ff', borderLeft: '4px solid #38B6FF', padding: '20px', borderRadius: '10px' }}>
-                          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px', fontWeight: '600' }}>Revenue from Campaigns</div>
-                          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#38B6FF' }}>
-                            {formatCurrency(results.campaignRevenue)}
-                          </div>
-                          <div style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>10% of store revenue</div>
-                        </div>
-                      </div>
-
-                      {/* Financial Summary */}
-                      <div style={{ background: '#f9fafb', borderRadius: '10px', padding: '25px', border: '2px solid #e5e7eb' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px solid #e5e7eb' }}>
-                          <span style={{ fontSize: '16px', fontWeight: '600', color: '#333' }}>Total New Revenue Generated</span>
-                          <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#38B6FF' }}>{formatCurrency(results.totalNewRevenue)}</span>
-                        </div>
-                        
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px solid #e5e7eb' }}>
-                          <span style={{ fontSize: '16px', fontWeight: '600', color: '#333' }}>Gross Profit Added</span>
-                          <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#10b981' }}>{formatCurrency(results.grossProfit)}</span>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px solid #e5e7eb' }}>
-                          <span style={{ fontSize: '16px', fontWeight: '600', color: '#333' }}>Service Investment</span>
-                          <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#ef4444' }}>-{formatCurrency(results.totalServiceCost)}</span>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px' }}>
-                          <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>Net Profit Added</span>
-                          <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#10b981' }}>{formatCurrency(results.netProfit)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <div className="text-sm text-gray-500 mt-2">
+                    To sign {results.actualClients} clients at {results.close}% close rate
+                  </div>
                 </div>
 
-                {/* What's Included Section */}
-                <div style={{ background: 'white', borderRadius: '20px', boxShadow: '0 10px 40px rgba(56, 182, 255, 0.15)', padding: '40px' }}>
-                  <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#38B6FF', marginBottom: '20px', textAlign: 'center' }}>
-                    What's Included
-                  </h2>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '15px' }}>
-                    {[
-                      'Klaviyo Account Audit & Restructuring',
-                      'Deliverability & Domain Setup',
-                      'List Hygiene & Segmentation Cleanup',
-                      'Lifecycle Revenue Mapping',
-                      'Revenue Attribution Setup',
-                      'Pop-Up Design & Deployment',
-                      'Advanced Pop-Up Logic',
-                      'Pop-Up Optimization',
-                      'Core Revenue Flows (Email + SMS)',
-                      'Flow Execution Details',
-                      'Email Campaigns (3–4 per week)',
-                      'SMS Campaigns (1–2 per week)',
-                      'Monthly Campaign Calendar',
-                      'Advanced Segmentation Framework',
-                      'A/B Testing Across the Entire System',
-                      'Weekly Optimization Sprints',
-                      'Weekly Revenue Reports',
-                      'Monthly Strategy Call',
-                      'Offer Strategy & Merchandising Support',
-                      'Performance Accountability Dashboard',
-                    ].map((item, index) => (
-                      <div key={index} style={{ display: 'flex', alignItems: 'center', padding: '12px', background: '#f0f9ff', borderRadius: '8px' }}>
-                        <span style={{ color: '#38B6FF', fontSize: '20px', marginRight: '12px' }}>✓</span>
-                        <span style={{ fontSize: '15px', color: '#333', fontWeight: '500' }}>{item}</span>
-                      </div>
-                    ))}
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <div className="text-sm text-gray-600 mb-1">Clients Signed</div>
+                  <div className="text-3xl font-bold text-gray-800">
+                    {results.actualClients} clients
+                  </div>
+                  <div className="text-sm text-gray-500 mt-2">
+                    Based on your call capacity and close rate
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 p-6 rounded-lg">
+                  <div className="text-sm mb-1" style={{color: '#38B6FF'}}>Monthly Revenue Generated</div>
+                  <div className="text-3xl font-bold" style={{color: '#38B6FF'}}>
+                    ${results.monthlyRevenue.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-2">
+                    New money from outbound clients
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 p-6 rounded-lg">
+                  <div className="text-sm mb-1" style={{color: '#38B6FF'}}>Monthly Gross Profit</div>
+                  <div className="text-3xl font-bold" style={{color: '#38B6FF'}}>
+                    ${results.grossProfit.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-2">
+                    At {parseFloat(grossMargin)}% margin
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <div className="text-sm text-gray-600 mb-1">Total Outbound Cost</div>
+                  <div className="text-3xl font-bold text-gray-800">
+                    ${results.totalOutboundCost.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-500 mt-2">
+                    $1,000 tech fee + ${results.actualClients * 400} performance fee
+                  </div>
+                </div>
+
+                <div className="bg-green-50 p-6 rounded-lg">
+                  <div className="text-sm text-green-700 mb-1">Net Profit After Outbound</div>
+                  <div className="text-3xl font-bold text-green-700">
+                    ${results.netProfit.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-2">
+                    Pure profit from outbound system
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        }
 
-        ReactDOM.render(<App />, document.getElementById('root'));
+              {/* ROI Highlight */}
+              <div className="text-center p-8 rounded-lg mb-8" style={{backgroundColor: '#38B6FF'}}>
+                <div className="text-white text-lg mb-2">Your Return on Investment</div>
+                <div className="text-white text-6xl font-bold mb-2">
+                  {results.roi.toFixed(1)}x ROI
+                </div>
+                <div className="text-blue-100 text-lg">
+                  For every $1 invested, you earn ${(results.roi + 1).toFixed(2)}
+                </div>
+              </div>
+
+              {/* Summary Statement */}
+              <div className="bg-gray-50 p-6 rounded-lg mb-6">
+                <p className="text-gray-800 text-lg leading-relaxed">
+                  <strong>Based on these numbers,</strong> signing just <strong>{results.actualClients} clients per month</strong> would generate <strong>${results.monthlyRevenue.toLocaleString()} in new revenue</strong> and <strong>${results.netProfit.toLocaleString()} in profit</strong>, making outbound one of the highest-leverage growth channels available to your business.
+                </p>
+              </div>
+
+              {/* Why Outbound Works */}
+              <div className="border-t pt-6 mb-6">
+                <h3 className="text-xl font-bold mb-4 text-gray-800">
+                  Why Outbound is Predictable & Controllable
+                </h3>
+                <div className="space-y-3 text-gray-700">
+                  <div className="flex items-start">
+                    <span className="text-2xl mr-3">✓</span>
+                    <p><strong>Creates New Money:</strong> Unlike ads or SEO, outbound doesn't compete for existing traffic—it creates entirely new opportunities by reaching prospects who aren't actively searching for you.</p>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="text-2xl mr-3">✓</span>
+                    <p><strong>Predictable Pipeline:</strong> You control the volume. Want more calls? Send more emails. Want better quality? Refine your targeting. It's a direct input-output system.</p>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="text-2xl mr-3">✓</span>
+                    <p><strong>No Platform Risk:</strong> You're not dependent on algorithm changes, ad costs, or referral timing. Your growth is in your hands, not at the mercy of external platforms.</p>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="text-2xl mr-3">✓</span>
+                    <p><strong>Performance-Based Pricing:</strong> With $1,000/month base + $400 per client signed, you only pay more when you win more. Your investment scales with your success.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* What You Get Section */}
+              <div className="border-t pt-6">
+                <h3 className="text-2xl font-bold mb-4 text-center" style={{color: '#38B6FF'}}>
+                  What You Get: Full-Service Outbound System
+                </h3>
+                <p className="text-center text-gray-600 mb-6">
+                  Everything you need to book qualified sales calls and sign new clients
+                </p>
+                <div className="grid md:grid-cols-2 gap-3">
+                  {deliverables.map((item, index) => (
+                    <div key={index} className="flex items-start bg-blue-50 p-4 rounded-lg">
+                      <span className="text-xl mr-3 mt-1" style={{color: '#38B6FF'}}>✓</span>
+                      <span className="text-gray-800 font-medium">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4">
+              <button
+                onClick={handleBack}
+                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+              >
+                ← Edit Inputs
+              </button>
+              <button
+                onClick={handleReset}
+                className="flex-1 py-3 rounded-lg font-semibold text-white transition-colors"
+                style={{backgroundColor: '#38B6FF'}}
+              >
+                Start Over
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Footer Note */}
+        <div className="text-center mt-8 text-gray-500 text-sm">
+          <p>This calculator uses conservative assumptions based on qualified sales calls and proven close rates.</p>
+          <p className="mt-1">Actual results may vary based on your offer, market, and sales process.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
     </script>
 </body>
 </html>
