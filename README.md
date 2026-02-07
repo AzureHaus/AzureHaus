@@ -1,25 +1,34 @@
-# E-commerce Email & SMS ROI Calculator
+# B2B Outbound ROI Calculator
 
-An interactive ROI calculator for the E-commerce Email & SMS Revenue Launch System.
+An interactive ROI calculator for service businesses evaluating a cold email outbound client acquisition system.
 
 ## Live Demo
 [View Calculator](https://azurehaus.github.io/AzureHaus/)
 
 ## What It Does
-Calculates potential ROI for e-commerce stores using email and SMS marketing automation, including:
-- New subscriber capture projections
-- Revenue from automated flows (15% lift)
-- Revenue from campaigns (10% lift)
-- Net profit and ROI calculations
+Calculates the predictable ROI of installing a cold email outbound system that books qualified sales calls and signs new clients, including:
+- Sales calls required to hit client acquisition goals
+- Monthly revenue generated from new clients
+- Gross profit and net profit calculations
+- ROI multiple based on performance-based pricing
 
 ## Service Details
-- **Cost:** $3,000/month or more
-- **Includes:** Full Klaviyo setup, automated flows, SMS system, weekly campaigns, and more
+- **Pricing:** $1,000/month tech fee + $400 per client signed
+- **Includes:** Full outbound infrastructure from ICP engineering to appointment booking, reply management, and ongoing optimization
 
 ## Usage
-Simply open the calculator and enter:
-- Monthly store revenue
-- Monthly website visitors
-- Profit margin
+The calculator guides you through 5 questions:
+1. Average deal value
+2. Close rate on qualified sales calls
+3. Monthly call capacity
+4. Target number of new clients per month
+5. Gross margin percentage
 
-The calculator will show your projected 90-day results and ROI.
+The calculator will show your projected monthly results, ROI multiple, and explain why outbound is a predictable, controllable growth channel compared to ads or referrals.
+
+## Key Features
+- Step-by-step question flow with progress tracking
+- Conservative ROI projections based on real metrics
+- Performance-based pricing model
+- Complete deliverables breakdown
+- No vanity metrics—only calls, clients, revenue, and profit
