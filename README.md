@@ -1,4 +1,4 @@
-# B2B Cold Email ROI Calculator
+# Cold Email ROI Calculator
 
 An interactive ROI calculator for service businesses evaluating a cold email outbound client acquisition system.
 
@@ -18,7 +18,7 @@ Calculates the predictable ROI of installing a cold email outbound system that b
 
 ## Usage
 The calculator guides you through 5 questions:
-1. Average deal value
+1. Minimum deal value
 2. Close rate on qualified sales calls
 3. Monthly call capacity
 4. Target number of new clients per month
