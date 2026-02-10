@@ -24,7 +24,7 @@ The calculator guides you through 5 questions:
 4. Target number of new clients per month
 5. Gross margin percentage
 
-The calculator will show your projected monthly results, ROI multiple, and explain why outbound is a predictable, controllable growth channel compared to ads or referrals.
+The calculator will show your projected monthly results, ROI multiple, and explain why cold email is a predictable, controllable growth channel compared to ads or referrals.
 
 ## Key Features
 - Step-by-step question flow with progress tracking
