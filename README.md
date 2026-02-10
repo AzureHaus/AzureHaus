@@ -1,4 +1,4 @@
-# B2B Outbound ROI Calculator
+# B2B Cold Email ROI Calculator
 
 An interactive ROI calculator for service businesses evaluating a cold email outbound client acquisition system.
 
